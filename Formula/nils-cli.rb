@@ -1,8 +1,7 @@
 class NilsCli < Formula
   desc "Rust CLI bundle (git-scope, git-summary, api-rest, api-gql, api-test, ...)"
   homepage "https://github.com/graysurf/nils-cli"
-  version "0.1.0"
-  license "MIT OR Apache-2.0"
+  license any_of: ["MIT", "Apache-2.0"]
 
   on_macos do
     if Hardware::CPU.arm?

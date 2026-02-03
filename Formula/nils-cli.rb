@@ -29,6 +29,7 @@ class NilsCli < Formula
   end
 
   test do
-    system "#{bin}/git-scope", "--help"
+    system "git", "init", testpath
+    system "#{bin}/git-scope", "--help", chdir: testpath
   end
 end

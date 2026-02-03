@@ -12,6 +12,9 @@ Prereqs:
 - Run inside this `homebrew-tap` git work tree.
 - `gh` authenticated with access to `graysurf/nils-cli` releases.
 - `python3` available on `PATH`.
+- `semantic-commit` available on `PATH` (install via `brew install nils-cli`).
+- `git-scope` available on `PATH` (required by `semantic-commit`).
+- Git remote configured + push access (workflow ends with `git push`).
 - Optional: `ruby` for `ruby -c` formula syntax check.
 - Optional: `brew` for `brew style` (skipped if missing).
 
@@ -34,6 +37,7 @@ Outputs:
   - `aarch64-unknown-linux-gnu`
   - `x86_64-unknown-linux-gnu`
 - Downloads `*.sha256` release assets into `$CODEX_HOME/out/homebrew-tap/nils-cli/<tag>/`.
+- Commits the formula bump with `semantic-commit` and pushes it (skipped for `--dry-run` or no-op bumps).
 
 Exit codes:
 
@@ -44,8 +48,10 @@ Exit codes:
 Failure modes:
 
 - Missing prerequisites (`gh`, `python3`) or `gh` not authenticated.
+- Missing `semantic-commit` or `git-scope` (required for commit step).
 - Target release tag not found or missing `*.sha256` assets.
 - `Formula/nils-cli.rb` format changed (cannot find expected `url` + `sha256` pairs).
+- `git push` fails (auth, missing upstream, branch protections).
 
 ## Scripts (only entrypoints)
 
@@ -57,4 +63,6 @@ Failure modes:
   - `bash .codex/skills/homebrew-tap-bump-nils-cli/scripts/homebrew-tap-bump-nils-cli.sh --version v0.1.3`
 - Bump to latest:
   - `bash .codex/skills/homebrew-tap-bump-nils-cli/scripts/homebrew-tap-bump-nils-cli.sh --latest`
-
+- After a successful bump (and not `--dry-run`), commit + push to complete the update:
+  - Use `$semantic-commit-autostage` to commit
+  - `git push`

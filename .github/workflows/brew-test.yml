@@ -1,0 +1,26 @@
+name: Brew Test
+
+on:
+  workflow_call:
+    inputs:
+      runner_os:
+        description: Runner OS
+        required: true
+        type: string
+
+jobs:
+  brew-test:
+    runs-on: ${{ inputs.runner_os }}
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+    steps:
+      - name: Checkout tap
+        uses: actions/checkout@v4
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@v1
+      - name: Tap local repository
+        run: brew tap graysurf/tap "$GITHUB_WORKSPACE"
+      - name: Install nils-cli
+        run: brew install nils-cli
+      - name: Test nils-cli
+        run: brew test nils-cli

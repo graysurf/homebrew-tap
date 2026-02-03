@@ -1,0 +1,15 @@
+name: CI Linux
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  brew-test:
+    uses: ./.github/workflows/brew-test.yml
+    with:
+      runner_os: ubuntu-latest

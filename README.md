@@ -12,10 +12,11 @@ A Rust CLI workspace scaffold for building multiple independently packaged binar
 - `git-scope`: Show git changes by scope (tracked/staged/unstaged/all/commit), optional content output.
 - `git-summary`: Summarize git activity across preset or custom date ranges.
 - `git-lock`: Create named commit locks and diff/tag/unlock them later.
-- `fzf-cli`: `fzf`-powered pickers for files/dirs/git status/commits/branches/tags, processes, and ports.
+- `fzf-cli`: fzf-powered pickers for files/dirs/git status/commits/branches/tags, processes, and ports.
 - `semantic-commit`: Semantic commit helper (staged context + commit from prepared message).
 - `plan-tooling`: Plan Format v1 tooling (to-json/validate/batches/scaffold).
 - `image-processing`: Batch image transformations (convert/resize/rotate/crop/pad/optimize).
+- `codex-cli`: Codex CLI helpers for authentication, rate-limit checks, and Starship prompt integration.
 - `cli-template`: Minimal template binary for validating workspace packaging.
 
 ## Install

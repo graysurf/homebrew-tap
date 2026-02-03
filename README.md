@@ -1,5 +1,10 @@
 # graysurf Homebrew tap
 
+## nils-cli
+
+- Source: https://github.com/graysurf/nils-cli
+- Summary: A Rust CLI workspace scaffold for building multiple independently packaged binaries.
+
 ## Install
 
 ```bash

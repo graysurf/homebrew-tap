@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "nils-cli-v*"
+
+jobs:
+  brew-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner_os:
+          - macos-latest
+          - ubuntu-latest
+    uses: ./.github/workflows/brew-test.yml
+    with:
+      runner_os: ${{ matrix.runner_os }}
+
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - brew-test
+    permissions:
+      contents: write
+    steps:
+      - name: Create GitHub release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = context.ref.replace("refs/tags/", "");
+
+            try {
+              await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag,
+              });
+              core.info(`Release already exists for ${tag}; skipping.`);
+              return;
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: tag,
+              name: tag,
+              generate_release_notes: true,
+              draft: false,
+              prerelease: false,
+            });
+            core.info(`Created release for ${tag}.`);

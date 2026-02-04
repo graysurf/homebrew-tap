@@ -12,10 +12,17 @@ Options:
   --dry-run               Print unified diff; do not write
   --no-ruby-check         Skip `ruby -c` validation
   --no-style              Skip `brew style` validation
+  --no-commit             Skip committing the formula bump
+  --no-push               Skip pushing commits/tags
+  --no-tap-tag            Skip creating/pushing a tap git tag (release trigger)
+  --tap-tag <tag>         Override tap git tag name (default: nils-cli-<tag>)
+  --tap-tag-prefix <pfx>  Prefix for tap git tag (default: nils-cli-)
+  --remote <name>         Git remote to push to (default: origin)
   -h, --help              Show help
 
 Notes:
   - Downloads `*.sha256` assets into: $CODEX_HOME/out/homebrew-tap/nils-cli/<tag>/
+  - Pushing the tap tag triggers GitHub CI to create a GitHub Release.
 USAGE
 }
 
@@ -26,6 +33,12 @@ dry_run="false"
 latest="false"
 run_ruby_check="true"
 run_brew_style="true"
+run_commit="true"
+run_push="true"
+run_tap_tag="true"
+tap_tag=""
+tap_tag_prefix="nils-cli-"
+remote="origin"
 
 while [[ $# -gt 0 ]]; do
   case "${1:-}" in
@@ -72,6 +85,45 @@ while [[ $# -gt 0 ]]; do
       run_brew_style="false"
       shift
       ;;
+    --no-commit)
+      run_commit="false"
+      shift
+      ;;
+    --no-push)
+      run_push="false"
+      shift
+      ;;
+    --no-tap-tag)
+      run_tap_tag="false"
+      shift
+      ;;
+    --tap-tag)
+      if [[ $# -lt 2 ]]; then
+        echo "error: --tap-tag requires a value" >&2
+        usage >&2
+        exit 2
+      fi
+      tap_tag="${2:-}"
+      shift 2
+      ;;
+    --tap-tag-prefix)
+      if [[ $# -lt 2 ]]; then
+        echo "error: --tap-tag-prefix requires a value" >&2
+        usage >&2
+        exit 2
+      fi
+      tap_tag_prefix="${2:-}"
+      shift 2
+      ;;
+    --remote)
+      if [[ $# -lt 2 ]]; then
+        echo "error: --remote requires a value" >&2
+        usage >&2
+        exit 2
+      fi
+      remote="${2:-}"
+      shift 2
+      ;;
     -h|--help)
       usage
       exit 0
@@ -97,6 +149,15 @@ for cmd in gh python3 git; do
   fi
 done
 
+if [[ "$run_commit" == "true" ]]; then
+  for cmd in semantic-commit git-scope; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+      echo "error: $cmd is required (disable with --no-commit)" >&2
+      exit 1
+    fi
+  done
+fi
+
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 if [[ -z "$repo_root" ]]; then
   echo "error: must run inside a git work tree" >&2
@@ -115,6 +176,13 @@ fi
 if [[ ! -f "$formula_rel" ]]; then
   echo "error: formula not found: $formula_rel" >&2
   exit 1
+fi
+
+if [[ "$dry_run" != "true" && "$run_commit" == "true" ]]; then
+  if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
+    echo "error: working tree has local changes; commit or stash first" >&2
+    exit 1
+  fi
 fi
 
 codex_home="${CODEX_HOME:-$HOME/.codex}"
@@ -232,6 +300,11 @@ if [[ "$dry_run" == "true" ]]; then
   exit 0
 fi
 
+formula_changed="false"
+if ! git diff --quiet -- "$formula_rel"; then
+  formula_changed="true"
+fi
+
 if [[ "$run_ruby_check" == "true" ]]; then
   if command -v ruby >/dev/null 2>&1; then
     ruby -c "$formula_rel" >/dev/null
@@ -251,3 +324,49 @@ fi
 echo "ok: bumped nils-cli formula to $tag"
 echo "ok: sha256 assets cached in: $outdir"
 
+if [[ "$formula_changed" != "true" ]]; then
+  exit 0
+fi
+
+if [[ "$run_commit" == "true" ]]; then
+  git add "$formula_rel"
+  printf 'chore(formula): bump nils-cli to %s\n' "$tag" | semantic-commit commit
+else
+  echo "warn: --no-commit set; leaving changes uncommitted" >&2
+  exit 0
+fi
+
+if [[ "$run_tap_tag" == "true" ]]; then
+  if [[ -z "$tap_tag" ]]; then
+    tap_tag="${tap_tag_prefix}${tag}"
+  fi
+  if ! git check-ref-format --allow-onelevel "refs/tags/$tap_tag" >/dev/null 2>&1; then
+    echo "error: invalid tap tag name: $tap_tag" >&2
+    exit 1
+  fi
+  if git rev-parse -q --verify "refs/tags/$tap_tag" >/dev/null 2>&1; then
+    echo "ok: tap tag already exists locally: $tap_tag"
+  else
+    git tag -a "$tap_tag" -m "chore(formula): bump nils-cli to $tag"
+    echo "ok: created tap tag: $tap_tag"
+  fi
+fi
+
+if [[ "$run_push" == "true" ]]; then
+  if ! git remote get-url "$remote" >/dev/null 2>&1; then
+    echo "error: unknown git remote: $remote" >&2
+    exit 1
+  fi
+  branch="$(git rev-parse --abbrev-ref HEAD)"
+  if [[ -z "$branch" || "$branch" == "HEAD" ]]; then
+    echo "error: detached HEAD; cannot push" >&2
+    exit 1
+  fi
+  git push "$remote" "$branch"
+  if [[ "$run_tap_tag" == "true" ]]; then
+    git push "$remote" "$tap_tag"
+    echo "ok: pushed tap tag: $tap_tag (CI will create a GitHub Release)"
+  fi
+else
+  echo "warn: --no-push set; skipping git push" >&2
+fi

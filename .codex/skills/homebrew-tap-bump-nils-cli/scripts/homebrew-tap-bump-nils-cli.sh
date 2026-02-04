@@ -149,7 +149,7 @@ for cmd in gh python3 git; do
   fi
 done
 
-if [[ "$run_commit" == "true" ]]; then
+if [[ "$run_commit" == "true" && "$dry_run" != "true" ]]; then
   for cmd in semantic-commit git-scope; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
       echo "error: $cmd is required (disable with --no-commit)" >&2

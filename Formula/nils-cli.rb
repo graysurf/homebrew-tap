@@ -5,27 +5,34 @@ class NilsCli < Formula
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/graysurf/nils-cli/releases/download/v0.1.6/nils-cli-v0.1.6-aarch64-apple-darwin.tar.gz"
-      sha256 "5015d149524309e3eec27f394911b3efd668619b65552b2ac8a5cf157321b5e0"
+      url "https://github.com/graysurf/nils-cli/releases/download/v0.1.7/nils-cli-v0.1.7-aarch64-apple-darwin.tar.gz"
+      sha256 "4181e5dff4d683b9b472e7fe111f57054a4cbcd34139f689bacb8b5b0b5e48bd"
     else
-      url "https://github.com/graysurf/nils-cli/releases/download/v0.1.6/nils-cli-v0.1.6-x86_64-apple-darwin.tar.gz"
-      sha256 "2e9aab7cdd861714a0309bc23516a2a1c1b9b176fd8202791ee98b5024eaae0d"
+      url "https://github.com/graysurf/nils-cli/releases/download/v0.1.7/nils-cli-v0.1.7-x86_64-apple-darwin.tar.gz"
+      sha256 "9af0e44ee4daff14e49950a7c4272399b02901bf379612423028ac8e51af4778"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://github.com/graysurf/nils-cli/releases/download/v0.1.6/nils-cli-v0.1.6-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "da3054e6dcc68c0ffd40f2d143f122d652a6f62308e2d3e5c9ab19f2f1dd1af2"
+      url "https://github.com/graysurf/nils-cli/releases/download/v0.1.7/nils-cli-v0.1.7-aarch64-unknown-linux-gnu.tar.gz"
+      sha256 "6bca7b2417cacf4cbf9828d9ffdc39c4bded436121257b30f65c8702ff1f24cf"
     else
-      url "https://github.com/graysurf/nils-cli/releases/download/v0.1.6/nils-cli-v0.1.6-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "80d8ae45af60937b6982edc8543a41e5697fe4bec30f557c81846ca671faf82b"
+      url "https://github.com/graysurf/nils-cli/releases/download/v0.1.7/nils-cli-v0.1.7-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "da983e2ec45b21c634bfdb880c6cd3ababd81c5980fbbaf0de9125066cadf6de"
     end
   end
 
   def install
     bin.install Dir["bin/*"]
     zsh_completion.install Dir["completions/zsh/*"]
+
+    bash_files = Dir["completions/bash/*"]
+    bash_completion_files = bash_files.reject { |f| File.basename(f) == "aliases.bash" }
+    bash_completion.install bash_completion_files if bash_completion_files.any?
+
+    bash_aliases = bash_files.find { |f| File.basename(f) == "aliases.bash" }
+    pkgshare.install bash_aliases => "aliases.bash" if bash_aliases
   end
 
   test do

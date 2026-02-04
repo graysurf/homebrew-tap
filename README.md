@@ -39,6 +39,35 @@ if [[ -f "$(brew --prefix nils-cli)/share/zsh/site-functions/aliases.zsh" ]]; th
 fi
 ```
 
+## Bash completion + aliases (optional)
+
+`nils-cli` ships Bash completion scripts for each CLI, plus an opt-in Bash aliases file (for `gs*`/`cx*`/`ff*`).
+
+1) Enable Homebrew bash-completion (macOS/Linuxbrew):
+
+```bash
+brew install bash-completion@2
+```
+
+Then add this to your `~/.bashrc` (or `~/.bash_profile`, depending on your setup):
+
+```bash
+# Homebrew bash completion
+if command -v brew >/dev/null 2>&1; then
+  BREW_PREFIX="$(brew --prefix)"
+  [[ -r "${BREW_PREFIX}/etc/profile.d/bash_completion.sh" ]] && . "${BREW_PREFIX}/etc/profile.d/bash_completion.sh"
+fi
+```
+
+2) (Optional) Enable `nils-cli` Bash aliases:
+
+```bash
+# nils-cli aliases (optional)
+if [[ -f "$(brew --prefix nils-cli)/share/nils-cli/aliases.bash" ]]; then
+  source "$(brew --prefix nils-cli)/share/nils-cli/aliases.bash"
+fi
+```
+
 ## Install (Script)
 
 The install script supports macOS and Linux. It will install Homebrew (Linuxbrew on Linux) if missing.

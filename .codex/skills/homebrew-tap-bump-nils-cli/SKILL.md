@@ -64,5 +64,5 @@ Failure modes:
 - Bump to latest:
   - `bash .codex/skills/homebrew-tap-bump-nils-cli/scripts/homebrew-tap-bump-nils-cli.sh --latest`
 - After a successful bump (and not `--dry-run`), commit + push to complete the update:
-  - Use `$semantic-commit-autostage` to commit
+  - Use `$semantic-commit-autostage` skill to commit
   - `git push`

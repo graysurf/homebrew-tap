@@ -26,6 +26,19 @@ brew tap graysurf/tap
 brew install nils-cli
 ```
 
+## Zsh aliases (optional)
+
+`nils-cli` ships an opt-in Zsh aliases file (designed to avoid clobbering user-defined aliases/functions).
+
+After `brew install nils-cli`, add this to your `~/.zshrc`:
+
+```bash
+# nils-cli aliases (optional)
+if [[ -f "$(brew --prefix nils-cli)/share/zsh/site-functions/aliases.zsh" ]]; then
+  source "$(brew --prefix nils-cli)/share/zsh/site-functions/aliases.zsh"
+fi
+```
+
 ## Install (Script)
 
 The install script supports macOS and Linux. It will install Homebrew (Linuxbrew on Linux) if missing.

@@ -20,15 +20,28 @@ HOMEBREW_NO_AUTO_UPDATE=1 brew style Formula/nils-cli.rb
 
 ## Test
 
-Run the same checks used by CI:
+Default (CI-aligned) verification:
 
 ```bash
-HOMEBREW_NO_AUTO_UPDATE=1 brew install --formula ./Formula/nils-cli.rb
+brew tap graysurf/tap
+brew update-reset "$(brew --repo graysurf/tap)"
+HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall nils-cli || HOMEBREW_NO_AUTO_UPDATE=1 brew install nils-cli
+HOMEBREW_NO_AUTO_UPDATE=1 brew test nils-cli
+```
+
+## Local Development Test (Optional)
+
+Use this only when testing unpublished formula changes during development.
+
+```bash
+brew tap graysurf/tap "$(pwd)" --custom-remote
+brew update-reset "$(brew --repo graysurf/tap)"
+HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall nils-cli || HOMEBREW_NO_AUTO_UPDATE=1 brew install nils-cli
 HOMEBREW_NO_AUTO_UPDATE=1 brew test nils-cli
 ```
 
 ## Notes
 
 - CI reference: `.github/workflows/brew-test.yml`
-- If `brew install` reports an already-installed version, run:
-  `brew reinstall --formula ./Formula/nils-cli.rb`
+- `brew update-reset "$(brew --repo graysurf/tap)"` ensures local tap checkout is synced.
+- Local custom-remote tap reads committed git history; uncommitted changes are not included.

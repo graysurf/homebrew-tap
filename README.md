@@ -6,18 +6,29 @@ A Rust CLI workspace scaffold for building multiple independently packaged binar
 
 ### Included CLIs
 
-- `api-rest`: File-based REST API caller + Markdown report generator.
-- `api-gql`: File-based GraphQL API caller + Markdown report generator + schema helper.
-- `api-test`: API test suite runner (JSON results + Markdown summary; optional JUnit).
-- `git-scope`: Show git changes by scope (tracked/staged/unstaged/all/commit), optional content output.
-- `git-summary`: Summarize git activity across preset or custom date ranges.
-- `git-lock`: Create named commit locks and diff/tag/unlock them later.
-- `fzf-cli`: fzf-powered pickers for files/dirs/git status/commits/branches/tags, processes, and ports.
-- `semantic-commit`: Semantic commit helper (staged context + commit from prepared message).
-- `plan-tooling`: Plan Format v1 tooling (to-json/validate/batches/scaffold).
-- `image-processing`: Batch image transformations (convert/resize/rotate/crop/pad/optimize).
-- `codex-cli`: Codex CLI helpers for authentication, rate-limit checks, and Starship prompt integration.
-- `cli-template`: Minimal template binary for validating workspace packaging.
+#### API testing stack
+
+- `api-rest`: REST request runner from file-based JSON specs, with history + Markdown reports.
+- `api-gql`: GraphQL operation runner for `.graphql` files (variables, history, reports, schema).
+- `api-test`: Suite runner that orchestrates REST/GraphQL cases and outputs JSON (optional JUnit).
+
+#### Git tooling
+
+- `git-scope`: Git change inspector (tracked/staged/unstaged/all/commit) with optional file output.
+- `git-summary`: Per-author contribution summaries over preset or custom date ranges.
+- `git-lock`: Label-based commit locks per repo (lock/list/diff/unlock/tag).
+
+#### Agent and workflow tooling
+
+- `codex-cli`: Helper CLI for Codex workflows (auth, diagnostics, rate-limit checks, Starship snippets).
+- `semantic-commit`: Helper CLI for generating staged context and creating semantic commits.
+- `plan-tooling`: Plan Format v1 tooling CLI (to-json/validate/batches/scaffold).
+
+#### Automation and utility CLIs
+
+- `fzf-cli`: Interactive `fzf` toolbox for files, Git, processes, and ports.
+- `image-processing`: Batch image transformation CLI (convert/resize/rotate/crop/pad/optimize).
+- `cli-template`: Minimal template binary for validating workspace packaging patterns.
 
 ## Install
 

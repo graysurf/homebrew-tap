@@ -12,11 +12,11 @@ Prereqs:
 - Run inside this `homebrew-tap` git work tree.
 - `gh` authenticated with access to `graysurf/nils-cli` releases.
 - `python3` available on `PATH`.
+- `brew` available on `PATH` (used for `brew style` and post-publish local upgrade).
 - `semantic-commit` available on `PATH` (install via `brew install nils-cli`).
 - `git-scope` available on `PATH` (required by `semantic-commit`).
 - Git remote configured + push access (workflow ends with `git push`).
 - Optional: `ruby` for `ruby -c` formula syntax check.
-- Optional: `brew` for `brew style` (skipped if missing).
 
 Inputs:
 
@@ -46,6 +46,7 @@ Outputs:
 - Commits the formula bump with `semantic-commit` (skipped for `--dry-run`, `--no-commit`, or no-op bumps).
 - Pushes the commit to the configured remote (skipped for `--no-push`).
 - Creates + pushes a tap git tag (default: `nils-cli-<tag>`; e.g. `nils-cli-v0.1.6`) to trigger GitHub CI to create the corresponding GitHub Release (skipped for `--no-tap-tag` or `--no-push`).
+- After publish (`git push`), runs `brew update && brew upgrade nils-cli` to ensure local machine installs the latest binary.
 
 Exit codes:
 
@@ -62,6 +63,7 @@ Failure modes:
 - Working tree has local changes (script refuses to run to avoid committing unrelated diffs).
 - `git push` fails (auth, missing upstream, branch protections).
 - Tap tag already exists on remote with a different target (push rejected).
+- Post-publish local upgrade fails (`brew update` or `brew upgrade nils-cli`).
 
 ## Scripts (only entrypoints)
 
@@ -74,3 +76,4 @@ Failure modes:
 - Bump to latest:
   - `bash .codex/skills/homebrew-tap-bump-nils-cli/scripts/homebrew-tap-bump-nils-cli.sh --latest`
 - After the script pushes the tap tag, GitHub Actions will create a GitHub Release for that tag (default tag pattern: `nils-cli-v*`; workflow: `.github/workflows/release.yml`).
+- After publish completes, the script runs `brew update && brew upgrade nils-cli` so local install is refreshed to latest binary.

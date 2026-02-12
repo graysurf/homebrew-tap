@@ -23,6 +23,7 @@ Options:
 Notes:
   - Downloads `*.sha256` assets into: $CODEX_HOME/out/homebrew-tap/nils-cli/<tag>/
   - Pushing the tap tag triggers GitHub CI to create a GitHub Release.
+  - After publishing (`git push`), runs: brew update && brew upgrade nils-cli
 USAGE
 }
 
@@ -148,6 +149,13 @@ for cmd in gh python3 git; do
     exit 1
   fi
 done
+
+if [[ "$run_push" == "true" && "$dry_run" != "true" ]]; then
+  if ! command -v brew >/dev/null 2>&1; then
+    echo "error: brew is required for post-publish upgrade (disable with --no-push)" >&2
+    exit 1
+  fi
+fi
 
 if [[ "$run_commit" == "true" && "$dry_run" != "true" ]]; then
   for cmd in semantic-commit git-scope; do
@@ -367,6 +375,9 @@ if [[ "$run_push" == "true" ]]; then
     git push "$remote" "$tap_tag"
     echo "ok: pushed tap tag: $tap_tag (CI will create a GitHub Release)"
   fi
+  brew update
+  HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade nils-cli
+  echo "ok: local nils-cli upgraded to latest Homebrew version"
 else
   echo "warn: --no-push set; skipping git push" >&2
 fi

@@ -9,6 +9,14 @@ Usage:
 Options:
   --repo <OWNER/REPO>     GitHub repo (default: graysurf/nils-cli)
   --formula <path>        Formula path (default: Formula/nils-cli.rb)
+  --wait-release-timeout <seconds>
+                          Wait timeout for release readiness (default: 1800; 0 = no timeout)
+  --wait-release-interval <seconds>
+                          Poll interval while waiting release readiness (default: 30)
+  --release-workflow <name>
+                          Workflow filename/name used to detect release CI run (default: release.yml)
+  --assume-no-release-ci  Continue waiting without prompt when no release CI run is found
+  --no-wait-release       Fail fast if release page/assets are not ready
   --dry-run               Print unified diff; do not write
   --no-ruby-check         Skip `ruby -c` validation
   --no-style              Skip `brew style` validation
@@ -21,6 +29,8 @@ Options:
   -h, --help              Show help
 
 Notes:
+  - Requires the target git tag to exist in the source repo.
+  - Waits until release page is usable (not draft + required binaries/sha256 assets present).
   - Downloads `*.sha256` assets into: $CODEX_HOME/out/homebrew-tap/nils-cli/<tag>/
   - Pushing the tap tag triggers GitHub CI to create a GitHub Release.
   - After publishing (`git push`), runs: brew update && brew upgrade nils-cli
@@ -32,6 +42,11 @@ formula_rel="Formula/nils-cli.rb"
 tag=""
 dry_run="false"
 latest="false"
+wait_release="true"
+wait_release_timeout="1800"
+wait_release_interval="30"
+release_workflow="release.yml"
+assume_no_release_ci="false"
 run_ruby_check="true"
 run_brew_style="true"
 run_commit="true"
@@ -73,6 +88,41 @@ while [[ $# -gt 0 ]]; do
       fi
       formula_rel="${2:-}"
       shift 2
+      ;;
+    --wait-release-timeout)
+      if [[ $# -lt 2 ]]; then
+        echo "error: --wait-release-timeout requires seconds" >&2
+        usage >&2
+        exit 2
+      fi
+      wait_release_timeout="${2:-}"
+      shift 2
+      ;;
+    --wait-release-interval)
+      if [[ $# -lt 2 ]]; then
+        echo "error: --wait-release-interval requires seconds" >&2
+        usage >&2
+        exit 2
+      fi
+      wait_release_interval="${2:-}"
+      shift 2
+      ;;
+    --release-workflow)
+      if [[ $# -lt 2 ]]; then
+        echo "error: --release-workflow requires a value" >&2
+        usage >&2
+        exit 2
+      fi
+      release_workflow="${2:-}"
+      shift 2
+      ;;
+    --assume-no-release-ci)
+      assume_no_release_ci="true"
+      shift
+      ;;
+    --no-wait-release)
+      wait_release="false"
+      shift
       ;;
     --dry-run)
       dry_run="true"
@@ -143,6 +193,16 @@ if [[ -z "$tag" && "$latest" != "true" ]]; then
   exit 2
 fi
 
+if ! [[ "$wait_release_timeout" =~ ^[0-9]+$ ]]; then
+  echo "error: --wait-release-timeout must be an integer >= 0" >&2
+  exit 2
+fi
+
+if ! [[ "$wait_release_interval" =~ ^[1-9][0-9]*$ ]]; then
+  echo "error: --wait-release-interval must be an integer >= 1" >&2
+  exit 2
+fi
+
 for cmd in gh python3 git; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
     echo "error: $cmd is required" >&2
@@ -181,6 +241,212 @@ if [[ "$tag" != v* ]]; then
   tag="v${tag}"
 fi
 
+targets=(
+  "aarch64-apple-darwin"
+  "x86_64-apple-darwin"
+  "aarch64-unknown-linux-gnu"
+  "x86_64-unknown-linux-gnu"
+)
+
+required_release_assets=()
+for target_name in "${targets[@]}"; do
+  required_release_assets+=("nils-cli-${tag}-${target_name}.tar.gz")
+  required_release_assets+=("nils-cli-${tag}-${target_name}.tar.gz.sha256")
+done
+
+release_state="unknown"
+
+release_readiness_status() {
+  local json
+  if ! json="$(gh release view "$tag" -R "$repo" --json isDraft,assets,publishedAt,url 2>/dev/null)"; then
+    release_state="missing_release"
+    echo "release page not found"
+    return 1
+  fi
+
+  local status_line
+  status_line="$(
+    JSON_PAYLOAD="$json" python3 - "$tag" "${required_release_assets[@]}" <<'PY'
+from __future__ import annotations
+
+import json
+import os
+import sys
+
+
+tag = sys.argv[1]
+required_assets = sys.argv[2:]
+data = json.loads(os.environ["JSON_PAYLOAD"])
+
+if data.get("isDraft"):
+    print("draft|release exists but is draft")
+    raise SystemExit(0)
+
+assets = [asset.get("name", "") for asset in data.get("assets", [])]
+assets_set = set(assets)
+missing = [name for name in required_assets if name not in assets_set]
+if missing:
+    print(f"missing_assets|missing {len(missing)} assets: {', '.join(missing)}")
+    raise SystemExit(0)
+
+published_at = data.get("publishedAt") or "unknown"
+release_url = data.get("url") or "unknown"
+print(f"ready|publishedAt={published_at} url={release_url}")
+PY
+  )"
+
+  local state="${status_line%%|*}"
+  local detail="${status_line#*|}"
+  release_state="$state"
+
+  if [[ "$state" == "ready" ]]; then
+    echo "$detail"
+    return 0
+  fi
+
+  echo "$detail"
+  return 1
+}
+
+release_ci_state() {
+  local json
+  if ! json="$(
+    gh run list -R "$repo" --workflow "$release_workflow" --limit 20 \
+      --json status,conclusion,headBranch,displayTitle,event,url,createdAt 2>/dev/null
+  )"; then
+    if ! json="$(
+      gh run list -R "$repo" --limit 20 \
+        --json status,conclusion,headBranch,displayTitle,event,url,createdAt 2>/dev/null
+    )"; then
+      echo "unknown|failed to query GitHub Actions runs"
+      return 0
+    fi
+  fi
+
+  JSON_PAYLOAD="$json" python3 - "$tag" <<'PY'
+from __future__ import annotations
+
+import json
+import os
+import sys
+
+
+tag = sys.argv[1]
+active_states = {"queued", "in_progress", "waiting", "pending", "requested"}
+runs = json.loads(os.environ["JSON_PAYLOAD"])
+if not isinstance(runs, list):
+    print("unknown|unexpected gh run list payload")
+    raise SystemExit(0)
+
+def is_match(run: dict[str, object]) -> bool:
+    head_branch = str(run.get("headBranch") or "")
+    title = str(run.get("displayTitle") or "")
+    return (
+        head_branch == tag
+        or head_branch == f"refs/tags/{tag}"
+        or tag in title
+    )
+
+matched = [run for run in runs if is_match(run)]
+if not matched:
+    print("none|no matched workflow runs for tag")
+    raise SystemExit(0)
+
+for run in matched:
+    status = str(run.get("status") or "").lower()
+    if status in active_states:
+        url = run.get("url") or "unknown"
+        event = run.get("event") or "unknown"
+        print(f"active|status={status} event={event} url={url}")
+        raise SystemExit(0)
+
+latest = matched[0]
+status = latest.get("status") or "unknown"
+conclusion = latest.get("conclusion") or "unknown"
+url = latest.get("url") or "unknown"
+print(f"inactive|last status={status} conclusion={conclusion} url={url}")
+PY
+}
+
+confirm_no_release_ci() {
+  local ci_detail="$1"
+  echo "warn: tag $tag exists but release page is not ready and no active release CI run was found." >&2
+  echo "warn: $ci_detail" >&2
+  if [[ "$assume_no_release_ci" == "true" ]]; then
+    echo "warn: --assume-no-release-ci set; continue waiting for release readiness." >&2
+    return 0
+  fi
+  if [[ ! -t 0 || ! -t 1 ]]; then
+    echo "error: cannot prompt in non-interactive shell; use --assume-no-release-ci to continue waiting." >&2
+    return 1
+  fi
+
+  local reply
+  read -r -p "Continue waiting for release page readiness? [y/N] " reply
+  case "${reply,,}" in
+    y|yes)
+      return 0
+      ;;
+    *)
+      echo "error: aborted; trigger/publish release workflow for $tag then retry." >&2
+      return 1
+      ;;
+  esac
+}
+
+wait_for_release_readiness() {
+  local start_ts now_ts elapsed ci_line ci_state ci_detail
+  local prompted_no_ci="false"
+  start_ts="$(date +%s)"
+
+  while true; do
+    if detail="$(release_readiness_status)"; then
+      echo "ok: release ready for $tag ($detail)"
+      return 0
+    fi
+
+    echo "wait: release not ready for $tag ($detail)"
+
+    if [[ "$release_state" == "missing_release" ]]; then
+      ci_line="$(release_ci_state)"
+      ci_state="${ci_line%%|*}"
+      ci_detail="${ci_line#*|}"
+      case "$ci_state" in
+        active)
+          echo "wait: release CI is running ($ci_detail)"
+          ;;
+        inactive|none|unknown)
+          if [[ "$prompted_no_ci" != "true" ]]; then
+            if ! confirm_no_release_ci "$ci_detail"; then
+              return 1
+            fi
+            prompted_no_ci="true"
+          else
+            echo "wait: still waiting without active CI run ($ci_detail)"
+          fi
+          ;;
+      esac
+    fi
+
+    if (( wait_release_timeout > 0 )); then
+      now_ts="$(date +%s)"
+      elapsed="$((now_ts - start_ts))"
+      if (( elapsed >= wait_release_timeout )); then
+        echo "error: timed out waiting for release readiness ($wait_release_timeout seconds)" >&2
+        return 1
+      fi
+    fi
+
+    sleep "$wait_release_interval"
+  done
+}
+
+if ! gh api "repos/$repo/git/ref/tags/$tag" >/dev/null 2>&1; then
+  echo "error: required source tag not found: $repo@$tag" >&2
+  exit 1
+fi
+echo "ok: verified source tag exists: $repo@$tag"
+
 if [[ ! -f "$formula_rel" ]]; then
   echo "error: formula not found: $formula_rel" >&2
   exit 1
@@ -196,6 +462,17 @@ fi
 codex_home="${CODEX_HOME:-$HOME/.codex}"
 outdir="$codex_home/out/homebrew-tap/nils-cli/$tag"
 mkdir -p "$outdir"
+
+if [[ "$wait_release" == "true" ]]; then
+  wait_for_release_readiness
+else
+  if ! detail="$(release_readiness_status)"; then
+    echo "error: release is not ready for $tag ($detail)" >&2
+    echo "error: rerun without --no-wait-release to wait automatically." >&2
+    exit 1
+  fi
+  echo "ok: release ready for $tag ($detail)"
+fi
 
 gh release download "$tag" -R "$repo" --pattern "*.sha256" --dir "$outdir" --clobber >/dev/null
 

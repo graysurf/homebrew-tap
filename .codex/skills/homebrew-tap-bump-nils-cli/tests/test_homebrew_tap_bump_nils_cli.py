@@ -20,10 +20,15 @@ class TestHomebrewTapBumpNilsCliSkill(unittest.TestCase):
             "Failure modes:",
         ]:
             self.assertIn(heading, text)
+        self.assertIn("--wait-release-timeout <seconds>", text)
+        self.assertIn("--assume-no-release-ci", text)
 
     def test_entrypoint_help(self) -> None:
         script = self.skill_root / "scripts" / "homebrew-tap-bump-nils-cli.sh"
         self.assertTrue(script.is_file())
         out = subprocess.check_output(["bash", str(script), "--help"], text=True)
         self.assertIn("Usage:", out)
-
+        self.assertIn("--wait-release-timeout <seconds>", out)
+        self.assertIn("--wait-release-interval <seconds>", out)
+        self.assertIn("--release-workflow <name>", out)
+        self.assertIn("--assume-no-release-ci", out)

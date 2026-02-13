@@ -16,6 +16,7 @@ Prereqs:
 - `semantic-commit` available on `PATH` (install via `brew install nils-cli`).
 - `git-scope` available on `PATH` (required by `semantic-commit`).
 - Git remote configured + push access (workflow ends with `git push`).
+- For `--version`, the specified source git tag must already exist in `graysurf/nils-cli`.
 - Optional: `ruby` for `ruby -c` formula syntax check.
 
 Inputs:
@@ -25,6 +26,11 @@ Inputs:
 - Optional:
   - `--repo <OWNER/REPO>` (default: `graysurf/nils-cli`)
   - `--formula <path>` (default: `Formula/nils-cli.rb`)
+  - `--wait-release-timeout <seconds>`: max wait for release readiness (default: `1800`, `0` means no timeout).
+  - `--wait-release-interval <seconds>`: polling interval while waiting release readiness (default: `30`).
+  - `--release-workflow <name>`: workflow file/name used to detect release CI runs (default: `release.yml`).
+  - `--assume-no-release-ci`: continue waiting without interactive prompt when no release CI run is found.
+  - `--no-wait-release`: fail fast if release page/assets are not ready.
   - `--dry-run`: print a unified diff; do not write files.
   - `--no-ruby-check`: skip `ruby -c` check.
   - `--no-style`: skip `brew style` check.
@@ -42,6 +48,9 @@ Outputs:
   - `x86_64-apple-darwin`
   - `aarch64-unknown-linux-gnu`
   - `x86_64-unknown-linux-gnu`
+- Verifies the source tag exists before bumping.
+- Waits for GitHub release readiness (`release` exists, not draft, all required `tar.gz` + `.sha256` assets present).
+- If release page is missing and no active release CI run is detected, prompts whether to keep waiting (or uses `--assume-no-release-ci`).
 - Downloads `*.sha256` release assets into `$CODEX_HOME/out/homebrew-tap/nils-cli/<tag>/`.
 - Commits the formula bump with `semantic-commit` (skipped for `--dry-run`, `--no-commit`, or no-op bumps).
 - Pushes the commit to the configured remote (skipped for `--no-push`).
@@ -58,7 +67,10 @@ Failure modes:
 
 - Missing prerequisites (`gh`, `python3`) or `gh` not authenticated.
 - Missing `semantic-commit` or `git-scope` (required for commit step).
-- Target release tag not found or missing `*.sha256` assets.
+- Target source git tag not found.
+- Release readiness timeout reached before required assets become available.
+- Release page missing with no active CI run and user declines to continue waiting.
+- Non-interactive shell cannot prompt when release page missing + no active CI run (unless `--assume-no-release-ci` is set).
 - `Formula/nils-cli.rb` format changed (cannot find expected `url` + `sha256` pairs).
 - Working tree has local changes (script refuses to run to avoid committing unrelated diffs).
 - `git push` fails (auth, missing upstream, branch protections).
@@ -75,5 +87,7 @@ Failure modes:
   - `bash .codex/skills/homebrew-tap-bump-nils-cli/scripts/homebrew-tap-bump-nils-cli.sh --version v0.1.3`
 - Bump to latest:
   - `bash .codex/skills/homebrew-tap-bump-nils-cli/scripts/homebrew-tap-bump-nils-cli.sh --latest`
+- Release still being published (wait up to 30 minutes, poll every 30 seconds):
+  - `bash .codex/skills/homebrew-tap-bump-nils-cli/scripts/homebrew-tap-bump-nils-cli.sh --version v0.1.3 --wait-release-timeout 1800`
 - After the script pushes the tap tag, GitHub Actions will create a GitHub Release for that tag (default tag pattern: `nils-cli-v*`; workflow: `.github/workflows/release.yml`).
 - After publish completes, the script runs `brew update && brew upgrade nils-cli` so local install is refreshed to latest binary.

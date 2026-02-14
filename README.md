@@ -15,19 +15,25 @@ A Rust CLI workspace scaffold for building multiple independently packaged binar
 #### Git tooling
 
 - `git-scope`: Git change inspector (tracked/staged/unstaged/all/commit) with optional file output.
+- `git-cli`: Git tools dispatcher (utils/reset/commit/branch/ci/open).
 - `git-summary`: Per-author contribution summaries over preset or custom date ranges.
 - `git-lock`: Label-based commit locks per repo (lock/list/diff/unlock/tag).
 
 #### Agent and workflow tooling
 
+- `agent-docs`: Deterministic policy-document resolver for Codex/agent workflows (`resolve`, `contexts`, `add`, `baseline`).
+- `agentctl`: Provider-neutral control plane (`provider`, `diag`, `debug`, `workflow`, `automation`).
 - `codex-cli`: Helper CLI for Codex workflows (auth, diagnostics, rate-limit checks, Starship snippets).
 - `semantic-commit`: Helper CLI for generating staged context and creating semantic commits.
 - `plan-tooling`: Plan Format v1 tooling CLI (to-json/validate/batches/scaffold).
 
 #### Automation and utility CLIs
 
+- `macos-agent`: macOS desktop automation primitives for app/window discovery, input actions, screenshot, and wait helpers.
 - `fzf-cli`: Interactive `fzf` toolbox for files, Git, processes, and ports.
+- `memo-cli`: Capture-first memo workflow CLI with agent enrichment loop (`add`, `list`, `search`, `report`, `fetch`, `apply`).
 - `image-processing`: Batch image transformation CLI (convert/resize/rotate/crop/pad/optimize).
+- `screen-record`: macOS ScreenCaptureKit + Linux (X11) recorder for a single window or display with optional audio.
 - `cli-template`: Minimal template binary for validating workspace packaging patterns.
 
 ## Install

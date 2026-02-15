@@ -51,7 +51,7 @@ Outputs:
 - Verifies the source tag exists before bumping.
 - Waits for GitHub release readiness (`release` exists, not draft, all required `tar.gz` + `.sha256` assets present).
 - If release page is missing and no active release CI run is detected, prompts whether to keep waiting (or uses `--assume-no-release-ci`).
-- Downloads `*.sha256` release assets into `$CODEX_HOME/out/homebrew-tap/nils-cli/<tag>/`.
+- Downloads `*.sha256` release assets into `$AGENTS_HOME/out/homebrew-tap/nils-cli/<tag>/`.
 - Commits the formula bump with `semantic-commit` (skipped for `--dry-run`, `--no-commit`, or no-op bumps).
 - Pushes the commit to the configured remote (skipped for `--no-push`).
 - Creates + pushes a tap git tag (default: `nils-cli-<tag>`; e.g. `nils-cli-v0.1.6`) to trigger GitHub CI to create the corresponding GitHub Release (skipped for `--no-tap-tag` or `--no-push`).
@@ -79,15 +79,15 @@ Failure modes:
 
 ## Scripts (only entrypoints)
 
-- `.codex/skills/homebrew-tap-bump-nils-cli/scripts/homebrew-tap-bump-nils-cli.sh`
+- `.agents/skills/homebrew-tap-bump-nils-cli/scripts/homebrew-tap-bump-nils-cli.sh`
 
 ## Workflow
 
 - Bump to a specific version:
-  - `bash .codex/skills/homebrew-tap-bump-nils-cli/scripts/homebrew-tap-bump-nils-cli.sh --version v0.1.3`
+  - `bash .agents/skills/homebrew-tap-bump-nils-cli/scripts/homebrew-tap-bump-nils-cli.sh --version v0.1.3`
 - Bump to latest:
-  - `bash .codex/skills/homebrew-tap-bump-nils-cli/scripts/homebrew-tap-bump-nils-cli.sh --latest`
+  - `bash .agents/skills/homebrew-tap-bump-nils-cli/scripts/homebrew-tap-bump-nils-cli.sh --latest`
 - Release still being published (wait up to 30 minutes, poll every 30 seconds):
-  - `bash .codex/skills/homebrew-tap-bump-nils-cli/scripts/homebrew-tap-bump-nils-cli.sh --version v0.1.3 --wait-release-timeout 1800`
+  - `bash .agents/skills/homebrew-tap-bump-nils-cli/scripts/homebrew-tap-bump-nils-cli.sh --version v0.1.3 --wait-release-timeout 1800`
 - After the script pushes the tap tag, GitHub Actions will create a GitHub Release for that tag (default tag pattern: `nils-cli-v*`; workflow: `.github/workflows/release.yml`).
 - After publish completes, the script runs `brew update && brew upgrade nils-cli` so local install is refreshed to latest binary.

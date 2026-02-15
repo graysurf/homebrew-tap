@@ -31,7 +31,7 @@ Options:
 Notes:
   - Requires the target git tag to exist in the source repo.
   - Waits until release page is usable (not draft + required binaries/sha256 assets present).
-  - Downloads `*.sha256` assets into: $CODEX_HOME/out/homebrew-tap/nils-cli/<tag>/
+  - Downloads `*.sha256` assets into: $AGENTS_HOME/out/homebrew-tap/nils-cli/<tag>/
   - Pushing the tap tag triggers GitHub CI to create a GitHub Release.
   - After publishing (`git push`), runs: brew update && brew upgrade nils-cli
 USAGE
@@ -459,8 +459,8 @@ if [[ "$dry_run" != "true" && "$run_commit" == "true" ]]; then
   fi
 fi
 
-codex_home="${CODEX_HOME:-$HOME/.codex}"
-outdir="$codex_home/out/homebrew-tap/nils-cli/$tag"
+agents_home="${AGENTS_HOME:-${AGENTS_HOME:-$HOME/.agents}}"
+outdir="$agents_home/out/homebrew-tap/nils-cli/$tag"
 mkdir -p "$outdir"
 
 if [[ "$wait_release" == "true" ]]; then

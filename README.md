@@ -21,7 +21,7 @@ A Rust CLI workspace scaffold for building multiple independently packaged binar
 
 #### Agent and workflow tooling
 
-- `agent-docs`: Deterministic policy-document resolver for Codex/agent workflows (`resolve`, `contexts`, `add`, `baseline`).
+- `agent-docs`: Deterministic policy-document resolver for agent workflows (`resolve`, `contexts`, `add`, `baseline`).
 - `agentctl`: Provider-neutral control plane (`provider`, `diag`, `debug`, `workflow`, `automation`).
 - `codex-cli`: Helper CLI for Codex workflows (auth, diagnostics, rate-limit checks, Starship snippets).
 - `semantic-commit`: Helper CLI for generating staged context and creating semantic commits.

@@ -1,7 +1,7 @@
 class AgentWorkspaceLauncher < Formula
   desc "Docker wrapper for launching agent-ready workspaces"
   homepage "https://github.com/graysurf/agent-workspace-launcher"
-  version "1.1.0"
+  version "1.1.1"
   license "MIT"
   on_macos do
     on_arm do

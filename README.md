@@ -43,6 +43,24 @@ brew tap graysurf/tap
 brew install nils-cli
 ```
 
+## agent-workspace-launcher
+
+Docker wrapper for launching `agent-workspace` containers from the host shell. See:
+[agent-workspace-launcher](https://github.com/graysurf/agent-workspace-launcher)
+
+Install:
+
+```bash
+brew tap graysurf/tap
+brew install agent-workspace-launcher
+```
+
+Optional zsh wrapper source:
+
+```bash
+source "$(brew --prefix agent-workspace-launcher)/share/agent-workspace-launcher/aws.zsh"
+```
+
 ## Zsh aliases (optional)
 
 `nils-cli` ships an opt-in Zsh aliases file (designed to avoid clobbering user-defined aliases/functions).
@@ -105,6 +123,7 @@ curl -fsSL https://raw.githubusercontent.com/graysurf/homebrew-tap/main/scripts/
 
 ```bash
 brew upgrade nils-cli
+brew upgrade agent-workspace-launcher
 ```
 
 ## CI

@@ -22,6 +22,8 @@ class TestHomebrewTapBumpNilsCliSkill(unittest.TestCase):
             self.assertIn(heading, text)
         self.assertIn("--wait-release-timeout <seconds>", text)
         self.assertIn("--assume-no-release-ci", text)
+        self.assertIn("--package <name>", text)
+        self.assertIn("agent-workspace-launcher", text)
 
     def test_entrypoint_help(self) -> None:
         script = self.skill_root / "scripts" / "homebrew-tap-bump-nils-cli.sh"
@@ -32,3 +34,5 @@ class TestHomebrewTapBumpNilsCliSkill(unittest.TestCase):
         self.assertIn("--wait-release-interval <seconds>", out)
         self.assertIn("--release-workflow <name>", out)
         self.assertIn("--assume-no-release-ci", out)
+        self.assertIn("--package <name>", out)
+        self.assertIn("--asset-prefix <name>", out)

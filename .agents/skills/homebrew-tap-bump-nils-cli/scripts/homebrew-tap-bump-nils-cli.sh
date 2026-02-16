@@ -7,8 +7,10 @@ Usage:
   homebrew-tap-bump-nils-cli.sh (--version <vX.Y.Z|X.Y.Z> | --latest) [options]
 
 Options:
+  --package <name>        Homebrew formula/package name (default: nils-cli)
+  --asset-prefix <name>   Release asset filename prefix (default: <package>)
   --repo <OWNER/REPO>     GitHub repo (default: graysurf/nils-cli)
-  --formula <path>        Formula path (default: Formula/nils-cli.rb)
+  --formula <path>        Formula path (default: Formula/<package>.rb)
   --wait-release-timeout <seconds>
                           Wait timeout for release readiness (default: 1800; 0 = no timeout)
   --wait-release-interval <seconds>
@@ -23,22 +25,24 @@ Options:
   --no-commit             Skip committing the formula bump
   --no-push               Skip pushing commits/tags
   --no-tap-tag            Skip creating/pushing a tap git tag (release trigger)
-  --tap-tag <tag>         Override tap git tag name (default: nils-cli-<tag>)
-  --tap-tag-prefix <pfx>  Prefix for tap git tag (default: nils-cli-)
+  --tap-tag <tag>         Override tap git tag name (default: <package>-<tag>)
+  --tap-tag-prefix <pfx>  Prefix for tap git tag (default: <package>-)
   --remote <name>         Git remote to push to (default: origin)
   -h, --help              Show help
 
 Notes:
   - Requires the target git tag to exist in the source repo.
   - Waits until release page is usable (not draft + required binaries/sha256 assets present).
-  - Downloads `*.sha256` assets into: $AGENTS_HOME/out/homebrew-tap/nils-cli/<tag>/
+  - Downloads `*.sha256` assets into: $AGENTS_HOME/out/homebrew-tap/<package>/<tag>/
   - Pushing the tap tag triggers GitHub CI to create a GitHub Release.
-  - After publishing (`git push`), runs: brew update && brew upgrade nils-cli
+  - After publishing (`git push`), runs: brew update && brew upgrade <package>
 USAGE
 }
 
+package="nils-cli"
+asset_prefix=""
 repo="graysurf/nils-cli"
-formula_rel="Formula/nils-cli.rb"
+formula_rel=""
 tag=""
 dry_run="false"
 latest="false"
@@ -53,11 +57,29 @@ run_commit="true"
 run_push="true"
 run_tap_tag="true"
 tap_tag=""
-tap_tag_prefix="nils-cli-"
+tap_tag_prefix=""
 remote="origin"
 
 while [[ $# -gt 0 ]]; do
   case "${1:-}" in
+    --package)
+      if [[ $# -lt 2 ]]; then
+        echo "error: --package requires a value" >&2
+        usage >&2
+        exit 2
+      fi
+      package="${2:-}"
+      shift 2
+      ;;
+    --asset-prefix)
+      if [[ $# -lt 2 ]]; then
+        echo "error: --asset-prefix requires a value" >&2
+        usage >&2
+        exit 2
+      fi
+      asset_prefix="${2:-}"
+      shift 2
+      ;;
     --version)
       if [[ $# -lt 2 ]]; then
         echo "error: --version requires a value" >&2
@@ -193,6 +215,23 @@ if [[ -z "$tag" && "$latest" != "true" ]]; then
   exit 2
 fi
 
+if [[ -z "$package" || "$package" =~ [[:space:]] ]]; then
+  echo "error: --package must be a non-empty formula name without spaces" >&2
+  exit 2
+fi
+
+if [[ -z "$asset_prefix" ]]; then
+  asset_prefix="$package"
+fi
+
+if [[ -z "$formula_rel" ]]; then
+  formula_rel="Formula/${package}.rb"
+fi
+
+if [[ -z "$tap_tag_prefix" ]]; then
+  tap_tag_prefix="${package}-"
+fi
+
 if ! [[ "$wait_release_timeout" =~ ^[0-9]+$ ]]; then
   echo "error: --wait-release-timeout must be an integer >= 0" >&2
   exit 2
@@ -218,12 +257,10 @@ if [[ "$run_push" == "true" && "$dry_run" != "true" ]]; then
 fi
 
 if [[ "$run_commit" == "true" && "$dry_run" != "true" ]]; then
-  for cmd in semantic-commit git-scope; do
-    if ! command -v "$cmd" >/dev/null 2>&1; then
-      echo "error: $cmd is required (disable with --no-commit)" >&2
-      exit 1
-    fi
-  done
+  if ! command -v semantic-commit >/dev/null 2>&1; then
+    echo "error: semantic-commit is required (disable with --no-commit)" >&2
+    exit 1
+  fi
 fi
 
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
@@ -250,8 +287,8 @@ targets=(
 
 required_release_assets=()
 for target_name in "${targets[@]}"; do
-  required_release_assets+=("nils-cli-${tag}-${target_name}.tar.gz")
-  required_release_assets+=("nils-cli-${tag}-${target_name}.tar.gz.sha256")
+  required_release_assets+=("${asset_prefix}-${tag}-${target_name}.tar.gz")
+  required_release_assets+=("${asset_prefix}-${tag}-${target_name}.tar.gz.sha256")
 done
 
 release_state="unknown"
@@ -459,8 +496,8 @@ if [[ "$dry_run" != "true" && "$run_commit" == "true" ]]; then
   fi
 fi
 
-agents_home="${AGENTS_HOME:-${AGENTS_HOME:-$HOME/.agents}}"
-outdir="$agents_home/out/homebrew-tap/nils-cli/$tag"
+agents_home="${AGENTS_HOME:-$HOME/.agents}"
+outdir="$agents_home/out/homebrew-tap/$package/$tag"
 mkdir -p "$outdir"
 
 if [[ "$wait_release" == "true" ]]; then
@@ -476,7 +513,7 @@ fi
 
 gh release download "$tag" -R "$repo" --pattern "*.sha256" --dir "$outdir" --clobber >/dev/null
 
-python3 - "$formula_rel" "$repo" "$tag" "$outdir" "$dry_run" <<'PY'
+python3 - "$formula_rel" "$repo" "$tag" "$outdir" "$dry_run" "$asset_prefix" <<'PY'
 from __future__ import annotations
 
 import difflib
@@ -500,7 +537,7 @@ def parse_sha256_file(path: Path) -> str:
     return sha
 
 
-formula_rel, repo, tag, outdir, dry_run_raw = sys.argv[1:]
+formula_rel, repo, tag, outdir, dry_run_raw, asset_prefix = sys.argv[1:]
 dry_run = dry_run_raw.strip().lower() == "true"
 
 targets = [
@@ -513,7 +550,7 @@ targets = [
 sha_by_target: dict[str, str] = {}
 missing_sha_files: list[str] = []
 for target in targets:
-    sha_file = Path(outdir) / f"nils-cli-{tag}-{target}.tar.gz.sha256"
+    sha_file = Path(outdir) / f"{asset_prefix}-{tag}-{target}.tar.gz.sha256"
     if not sha_file.is_file():
         missing_sha_files.append(sha_file.name)
         continue
@@ -541,7 +578,7 @@ for i, line in enumerate(lines):
             continue
 
         indent = line[: len(line) - len(stripped)]
-        url = f"https://github.com/{repo}/releases/download/{tag}/nils-cli-{tag}-{target}.tar.gz"
+        url = f"https://github.com/{repo}/releases/download/{tag}/{asset_prefix}-{tag}-{target}.tar.gz"
         lines[i] = f'{indent}url "{url}"\n'
 
         j = i + 1
@@ -606,7 +643,7 @@ if [[ "$run_brew_style" == "true" ]]; then
   fi
 fi
 
-echo "ok: bumped nils-cli formula to $tag"
+echo "ok: bumped $package formula to $tag"
 echo "ok: sha256 assets cached in: $outdir"
 
 if [[ "$formula_changed" != "true" ]]; then
@@ -615,7 +652,7 @@ fi
 
 if [[ "$run_commit" == "true" ]]; then
   git add "$formula_rel"
-  printf 'chore(formula): bump nils-cli to %s\n' "$tag" | semantic-commit commit
+  printf 'chore(formula): bump %s to %s\n' "$package" "$tag" | semantic-commit commit
 else
   echo "warn: --no-commit set; leaving changes uncommitted" >&2
   exit 0
@@ -632,7 +669,7 @@ if [[ "$run_tap_tag" == "true" ]]; then
   if git rev-parse -q --verify "refs/tags/$tap_tag" >/dev/null 2>&1; then
     echo "ok: tap tag already exists locally: $tap_tag"
   else
-    git tag -a "$tap_tag" -m "chore(formula): bump nils-cli to $tag"
+    git tag -a "$tap_tag" -m "chore(formula): bump $package to $tag"
     echo "ok: created tap tag: $tap_tag"
   fi
 fi
@@ -653,8 +690,8 @@ if [[ "$run_push" == "true" ]]; then
     echo "ok: pushed tap tag: $tap_tag (CI will create a GitHub Release)"
   fi
   brew update
-  HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade nils-cli
-  echo "ok: local nils-cli upgraded to latest Homebrew version"
+  HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade "$package"
+  echo "ok: local $package upgraded to latest Homebrew version"
 else
   echo "warn: --no-push set; skipping git push" >&2
 fi

@@ -4,9 +4,41 @@ on:
   push:
     tags:
       - "nils-cli-v*"
+      - "agent-workspace-launcher-v*"
 
 jobs:
+  detect-formula:
+    runs-on: ubuntu-latest
+    outputs:
+      formula: ${{ steps.detect.outputs.formula }}
+      tag: ${{ steps.detect.outputs.tag }}
+    steps:
+      - name: Detect formula from tag
+        id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME:-}"
+          if [[ -z "$tag" ]]; then
+            echo "error: missing GITHUB_REF_NAME" >&2
+            exit 1
+          fi
+
+          if [[ "$tag" == nils-cli-v* ]]; then
+            formula="nils-cli"
+          elif [[ "$tag" == agent-workspace-launcher-v* ]]; then
+            formula="agent-workspace-launcher"
+          else
+            echo "error: unsupported release tag pattern: $tag" >&2
+            exit 1
+          fi
+
+          echo "tag=$tag" >>"$GITHUB_OUTPUT"
+          echo "formula=$formula" >>"$GITHUB_OUTPUT"
+
   brew-test:
+    needs:
+      - detect-formula
     strategy:
       fail-fast: false
       matrix:
@@ -16,10 +48,12 @@ jobs:
     uses: ./.github/workflows/brew-test.yml
     with:
       runner_os: ${{ matrix.runner_os }}
+      formula: ${{ needs.detect-formula.outputs.formula }}
 
   release:
     runs-on: ubuntu-latest
     needs:
+      - detect-formula
       - brew-test
     permissions:
       contents: write
@@ -28,7 +62,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const tag = context.ref.replace("refs/tags/", "");
+            const tag = "${{ needs.detect-formula.outputs.tag }}";
 
             try {
               await github.rest.repos.getReleaseByTag({

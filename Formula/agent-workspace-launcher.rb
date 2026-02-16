@@ -24,26 +24,21 @@ class AgentWorkspaceLauncher < Formula
     end
   end
   def install
-    bin.install "scripts/aws.bash" => "aws"
-    (bin/"aws").chmod 0755
-    pkgshare.install "scripts/aws.zsh"
+    bin.install "bin/agent-workspace-launcher"
+    bin.install "bin/awl"
+    pkgshare.install "scripts/awl.bash"
+    pkgshare.install "scripts/awl.zsh"
   end
 
   def caveats
     <<~EOS
       Optional zsh wrapper source:
-        source "#{opt_pkgshare}/aws.zsh"
+        source "#{opt_pkgshare}/awl.zsh"
     EOS
   end
 
   test do
-    (testpath/"docker").write <<~SH
-      #!/usr/bin/env bash
-      exit 0
-    SH
-    chmod 0755, testpath/"docker"
-    ENV.prepend_path "PATH", testpath
-
-    system "#{bin}/aws", "--help"
+    system "#{bin}/agent-workspace-launcher", "--help"
+    system "#{bin}/awl", "--help"
   end
 end

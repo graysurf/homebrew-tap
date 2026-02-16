@@ -5,22 +5,22 @@ class AgentWorkspaceLauncher < Formula
   license "MIT"
   on_macos do
     on_arm do
-      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.0/agent-workspace-launcher-v1.1.0-aarch64-apple-darwin.tar.gz"
-      sha256 "95c024e7dd8981dc9493270ae6d397d66dedd2c109edd274da1d77ba47038396"
+      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.1/agent-workspace-launcher-v1.1.1-aarch64-apple-darwin.tar.gz"
+      sha256 "b1873416fda66cb7855ceb3b30e19e9fbfbef38b1426a610d5ec597fd66f51eb"
     end
     on_intel do
-      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.0/agent-workspace-launcher-v1.1.0-x86_64-apple-darwin.tar.gz"
-      sha256 "6cf2f5aea7a4b807326cdcff29bc8ad4eefbd45ac79b1b3eaf7536dc8f0bcfea"
+      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.1/agent-workspace-launcher-v1.1.1-x86_64-apple-darwin.tar.gz"
+      sha256 "2b5c3f35caeeb6a08619b3fc6b876e375c44ed4594aa6353623bf260c3d74f66"
     end
   end
   on_linux do
     on_arm do
-      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.0/agent-workspace-launcher-v1.1.0-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "4d8a2a370138235d9819c2d925f7811847f2fff8178e7090ed7beb910b3464de"
+      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.1/agent-workspace-launcher-v1.1.1-aarch64-unknown-linux-gnu.tar.gz"
+      sha256 "88330bc0485376755db8e89411a85ba99e4d1d38ccfc20535168a64817bf659e"
     end
     on_intel do
-      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.0/agent-workspace-launcher-v1.1.0-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "09436f0e5e0f16f2e67a3173f8cc48883f04ad1d67233fbceffff000d93660de"
+      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.1/agent-workspace-launcher-v1.1.1-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "c0efaa1daa59cfe0a13a12ae2d4c78ea0cb46d36fd64f9b7cc2cba291c482475"
     end
   end
   def install

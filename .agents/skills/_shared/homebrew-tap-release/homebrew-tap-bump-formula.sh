@@ -4,7 +4,7 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  homebrew-tap-bump-nils-cli.sh (--version <vX.Y.Z|X.Y.Z> | --latest) [options]
+  homebrew-tap-bump-formula.sh (--version <vX.Y.Z|X.Y.Z> | --latest) [options]
 
 Options:
   --package <name>        Homebrew formula/package name (default: nils-cli)

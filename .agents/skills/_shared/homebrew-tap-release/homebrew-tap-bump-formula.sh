@@ -599,6 +599,25 @@ for target, count in found.items():
     if count > 1:
         die(f"{formula_rel}: found {count} url entries for target {target} (expected 1)")
 
+version_value = tag[1:] if tag.startswith("v") else tag
+version_indices: list[int] = []
+for i, line in enumerate(lines):
+    stripped = line.lstrip()
+    if not stripped.startswith('version "'):
+        continue
+    if not re.fullmatch(r'version\s+"[^"]+"', stripped.rstrip("\n")):
+        continue
+    version_indices.append(i)
+
+if len(version_indices) > 1:
+    die(f"{formula_rel}: found multiple simple version entries (expected at most 1)")
+
+if version_indices:
+    idx = version_indices[0]
+    stripped = lines[idx].lstrip()
+    indent = lines[idx][: len(lines[idx]) - len(stripped)]
+    lines[idx] = f'{indent}version "{version_value}"\n'
+
 new_text = "".join(lines)
 if new_text == old_text:
     print(f"ok: already up to date: {formula_rel} ({tag})")

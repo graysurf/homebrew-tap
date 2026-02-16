@@ -43,7 +43,7 @@ Inputs:
 Outputs:
 
 - Bumps only `Formula/agent-workspace-launcher.rb` to the target source release.
-- Wrapper fixes release workflow to `release-brew.yml`.
+- Wrapper fixes release workflow to `release.yml`.
 - Commits/pushes/tagging behavior follows forwarded flags from shared script.
 - Post-publish performs `brew update && brew upgrade agent-workspace-launcher` unless push is disabled.
 
@@ -67,5 +67,5 @@ Failure modes:
 
 1. Run wrapper skill entrypoint with `--version` or `--latest`.
 2. Wrapper forwards supported options to shared script and injects:
-   `--package agent-workspace-launcher --repo graysurf/agent-workspace-launcher --formula Formula/agent-workspace-launcher.rb --release-workflow release-brew.yml`.
+   `--package agent-workspace-launcher --repo graysurf/agent-workspace-launcher --formula Formula/agent-workspace-launcher.rb --release-workflow release.yml`.
 3. Shared script performs release readiness checks, formula update, commit/push/tag, and local upgrade.

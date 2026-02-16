@@ -22,7 +22,6 @@ Inputs:
 - Optional (forwarded to shared script):
   - `--wait-release-timeout <seconds>`
   - `--wait-release-interval <seconds>`
-  - `--release-workflow <name>` (default `release.yml`)
   - `--assume-no-release-ci`
   - `--no-wait-release`
   - `--dry-run`
@@ -34,15 +33,17 @@ Inputs:
   - `--tap-tag <tag>`
   - `--tap-tag-prefix <pfx>`
   - `--remote <name>`
-- Disallowed overrides (this skill locks target package):
+- Disallowed overrides (this skill locks target package/workflow):
   - `--package`
   - `--repo`
   - `--formula`
   - `--asset-prefix`
+  - `--release-workflow`
 
 Outputs:
 
 - Bumps only `Formula/nils-cli.rb` to the target source release.
+- Wrapper fixes release workflow to `release.yml`.
 - Commits/pushes/tagging behavior follows forwarded flags from shared script.
 - Post-publish performs `brew update && brew upgrade nils-cli` unless push is disabled.
 
@@ -56,7 +57,7 @@ Failure modes:
 
 - Missing prerequisites or missing shared script.
 - Shared script validation failure (tag not found, release assets not ready, formula format mismatch, push/tag failure).
-- User passes locked arguments (`--package`, `--repo`, `--formula`, `--asset-prefix`).
+- User passes locked arguments (`--package`, `--repo`, `--formula`, `--asset-prefix`, `--release-workflow`).
 
 ## Scripts (only entrypoints)
 
@@ -66,5 +67,5 @@ Failure modes:
 
 1. Run wrapper skill entrypoint with `--version` or `--latest`.
 2. Wrapper forwards supported options to shared script and injects:
-   `--package nils-cli --repo graysurf/nils-cli --formula Formula/nils-cli.rb`.
+   `--package nils-cli --repo graysurf/nils-cli --formula Formula/nils-cli.rb --release-workflow release.yml`.
 3. Shared script performs release readiness checks, formula update, commit/push/tag, and local upgrade.

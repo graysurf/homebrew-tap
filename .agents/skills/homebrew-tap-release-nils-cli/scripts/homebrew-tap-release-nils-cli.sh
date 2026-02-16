@@ -13,9 +13,10 @@ Notes:
     --package nils-cli
     --repo graysurf/nils-cli
     --formula Formula/nils-cli.rb
+    --release-workflow release.yml
   - Forwarded options include:
     --version, --latest, --wait-release-timeout, --wait-release-interval,
-    --release-workflow, --assume-no-release-ci, --no-wait-release, --dry-run,
+    --assume-no-release-ci, --no-wait-release, --dry-run,
     --no-ruby-check, --no-style, --no-commit, --no-push, --no-tap-tag,
     --tap-tag, --tap-tag-prefix, --remote
 USAGE
@@ -31,7 +32,7 @@ fi
 
 for arg in "$@"; do
   case "$arg" in
-    --package|--repo|--formula|--asset-prefix)
+    --package|--repo|--formula|--asset-prefix|--release-workflow)
       echo "error: $arg is fixed by this entrypoint and cannot be overridden" >&2
       exit 2
       ;;
@@ -49,4 +50,5 @@ exec bash "$shared_script" \
   --package nils-cli \
   --repo graysurf/nils-cli \
   --formula Formula/nils-cli.rb \
+  --release-workflow release.yml \
   "$@"

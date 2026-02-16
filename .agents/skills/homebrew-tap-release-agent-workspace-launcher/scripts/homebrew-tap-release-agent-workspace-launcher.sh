@@ -13,7 +13,7 @@ Notes:
     --package agent-workspace-launcher
     --repo graysurf/agent-workspace-launcher
     --formula Formula/agent-workspace-launcher.rb
-    --release-workflow release-brew.yml
+    --release-workflow release.yml
   - Forwarded options include:
     --version, --latest, --wait-release-timeout, --wait-release-interval,
     --assume-no-release-ci, --no-wait-release, --dry-run, --no-ruby-check,
@@ -50,5 +50,5 @@ exec bash "$shared_script" \
   --package agent-workspace-launcher \
   --repo graysurf/agent-workspace-launcher \
   --formula Formula/agent-workspace-launcher.rb \
-  --release-workflow release-brew.yml \
+  --release-workflow release.yml \
   "$@"

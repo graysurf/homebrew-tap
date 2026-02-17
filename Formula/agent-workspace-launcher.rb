@@ -1,26 +1,26 @@
 class AgentWorkspaceLauncher < Formula
-  desc "Docker wrapper for launching agent-ready workspaces"
+  desc "Host-native workspace lifecycle CLI"
   homepage "https://github.com/graysurf/agent-workspace-launcher"
-  version "1.1.1"
+  version "1.1.2"
   license "MIT"
   on_macos do
     on_arm do
-      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.1/agent-workspace-launcher-v1.1.1-aarch64-apple-darwin.tar.gz"
-      sha256 "b1873416fda66cb7855ceb3b30e19e9fbfbef38b1426a610d5ec597fd66f51eb"
+      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.2/agent-workspace-launcher-v1.1.2-aarch64-apple-darwin.tar.gz"
+      sha256 "80cb671b2a481adcfec6126952ad991d936f94fd6b04bd348ba3d397ec4ec377"
     end
     on_intel do
-      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.1/agent-workspace-launcher-v1.1.1-x86_64-apple-darwin.tar.gz"
-      sha256 "2b5c3f35caeeb6a08619b3fc6b876e375c44ed4594aa6353623bf260c3d74f66"
+      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.2/agent-workspace-launcher-v1.1.2-x86_64-apple-darwin.tar.gz"
+      sha256 "fc32c4ac0f4d494a93e2c9725c09c0009fa9faf4a8a435a083187f3841583f81"
     end
   end
   on_linux do
     on_arm do
-      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.1/agent-workspace-launcher-v1.1.1-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "88330bc0485376755db8e89411a85ba99e4d1d38ccfc20535168a64817bf659e"
+      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.2/agent-workspace-launcher-v1.1.2-aarch64-unknown-linux-gnu.tar.gz"
+      sha256 "21191ebc4321a440792d4409385095649bd182c3b5924207d118e23b75bc3ebc"
     end
     on_intel do
-      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.1/agent-workspace-launcher-v1.1.1-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "c0efaa1daa59cfe0a13a12ae2d4c78ea0cb46d36fd64f9b7cc2cba291c482475"
+      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.2/agent-workspace-launcher-v1.1.2-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "d903fc74f6335f4d450f3bcbfd437d6d1f480033d958c079b5a2b5ea96b2faae"
     end
   end
   def install
@@ -28,6 +28,9 @@ class AgentWorkspaceLauncher < Formula
     bin.install "bin/awl"
     pkgshare.install "scripts/awl.bash"
     pkgshare.install "scripts/awl.zsh"
+
+    bash_completion.install "completions/agent-workspace-launcher.bash" => "agent-workspace-launcher"
+    zsh_completion.install "completions/_agent-workspace-launcher"
   end
 
   def caveats

@@ -1,8 +1,16 @@
 # graysurf Homebrew tap
 
+## Formula overview
+
+| Formula | Description | Source git repo |
+| --- | --- | --- |
+| `nils-cli` | Rust workspace of focused CLI binaries for Git operations, API test orchestration, and workflow automation. | [graysurf/nils-cli](https://github.com/graysurf/nils-cli) |
+| `agent-workspace-launcher` | Host-native workspace lifecycle CLI for repository-focused development. | [graysurf/agent-workspace-launcher](https://github.com/graysurf/agent-workspace-launcher) |
+
 ## nils-cli
 
-A Rust CLI workspace scaffold for building multiple independently packaged binaries. See: [nils-cli](https://github.com/graysurf/nils-cli)
+A Rust workspace of focused CLI binaries for Git operations, API testing, and workflow automation.
+Source git repo: [graysurf/nils-cli](https://github.com/graysurf/nils-cli)
 
 ### Included CLIs
 
@@ -10,11 +18,13 @@ A Rust CLI workspace scaffold for building multiple independently packaged binar
 
 - `api-rest`: REST request runner from file-based JSON specs, with history + Markdown reports.
 - `api-gql`: GraphQL operation runner for `.graphql` files (variables, history, reports, schema).
-- `api-test`: Suite runner that orchestrates REST/GraphQL cases and outputs JSON (optional JUnit).
+- `api-grpc`: gRPC request runner from JSON specs, with history + Markdown reports.
+- `api-websocket`: Deterministic WebSocket request runner with history + Markdown reports.
+- `api-test`: Suite runner that orchestrates REST/GraphQL/gRPC/WebSocket cases and outputs JSON (optional JUnit).
 
 #### Git tooling
 
-- `git-scope`: Git change inspector (tracked/staged/unstaged/all/commit) with optional file output.
+- `git-scope`: Git change inspector (tracked/staged/unstaged/untracked/commit) with optional file output.
 - `git-cli`: Git tools dispatcher (utils/reset/commit/branch/ci/open).
 - `git-summary`: Per-author contribution summaries over preset or custom date ranges.
 - `git-lock`: Label-based commit locks per repo (lock/list/diff/unlock/tag).
@@ -34,7 +44,6 @@ A Rust CLI workspace scaffold for building multiple independently packaged binar
 - `memo-cli`: Capture-first memo workflow CLI with agent enrichment loop (`add`, `list`, `search`, `report`, `fetch`, `apply`).
 - `image-processing`: Batch image transformation CLI (convert/resize/rotate/crop/pad/optimize).
 - `screen-record`: macOS ScreenCaptureKit + Linux (X11) recorder for a single window or display with optional audio.
-- `cli-template`: Minimal template binary for validating workspace packaging patterns.
 
 ## Install
 
@@ -45,8 +54,18 @@ brew install nils-cli
 
 ## agent-workspace-launcher
 
-Docker wrapper for launching `agent-workspace` containers from the host shell. See:
-[agent-workspace-launcher](https://github.com/graysurf/agent-workspace-launcher)
+Host-native workspace lifecycle CLI for repository-focused development.
+Source git repo: [graysurf/agent-workspace-launcher](https://github.com/graysurf/agent-workspace-launcher)
+
+Main subcommands:
+
+- `auth`
+- `create`
+- `ls`
+- `rm`
+- `exec`
+- `reset`
+- `tunnel`
 
 Install:
 
@@ -58,7 +77,7 @@ brew install agent-workspace-launcher
 Optional zsh wrapper source:
 
 ```bash
-source "$(brew --prefix agent-workspace-launcher)/share/agent-workspace-launcher/aws.zsh"
+source "$(brew --prefix agent-workspace-launcher)/share/agent-workspace-launcher/awl.zsh"
 ```
 
 ## Zsh aliases (optional)
@@ -76,7 +95,7 @@ fi
 
 ## Bash completion + aliases (optional)
 
-`nils-cli` ships Bash completion scripts for each CLI, plus an opt-in Bash aliases file (for `gs*`/`cx*`/`ff*`).
+`nils-cli` ships Bash completion scripts for each CLI, plus an opt-in Bash aliases file (for `gs*`/`cx*`/`fx*`).
 
 1) Enable Homebrew bash-completion (macOS/Linuxbrew):
 

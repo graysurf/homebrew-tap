@@ -1,26 +1,26 @@
 class AgentWorkspaceLauncher < Formula
   desc "Host-native workspace lifecycle CLI"
   homepage "https://github.com/graysurf/agent-workspace-launcher"
-  version "1.1.5"
+  version "1.1.6"
   license "MIT"
   on_macos do
     on_arm do
-      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.5/agent-workspace-launcher-v1.1.5-aarch64-apple-darwin.tar.gz"
-      sha256 "b86088a45ff2abbebb4ad56fa9449ae83bddeb47fd2f3e3217286030b25f7166"
+      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.6/agent-workspace-launcher-v1.1.6-aarch64-apple-darwin.tar.gz"
+      sha256 "671933c143dce0edb1c1f4a81f9f4c816003639cd43446965fb645cd1f71ba20"
     end
     on_intel do
-      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.5/agent-workspace-launcher-v1.1.5-x86_64-apple-darwin.tar.gz"
-      sha256 "d5d2489aea01dcd403c3bb3fa7339729fa0ed6b58eab8be4fe87542cbe4c6d0b"
+      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.6/agent-workspace-launcher-v1.1.6-x86_64-apple-darwin.tar.gz"
+      sha256 "49ca8c6de80ce40e2ce2d1efb30d9f0c98e4c6bce5fbed8163c2c2a70384350f"
     end
   end
   on_linux do
     on_arm do
-      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.5/agent-workspace-launcher-v1.1.5-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "cedbf17f77eced36aabe2789bf47476020bb6adbe3e6183b70b5e240afa9d785"
+      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.6/agent-workspace-launcher-v1.1.6-aarch64-unknown-linux-gnu.tar.gz"
+      sha256 "ceea47de089f95390767a427f30f15ed5cb513ff47b7bab2a4fd8b46972019bc"
     end
     on_intel do
-      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.5/agent-workspace-launcher-v1.1.5-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "82e953bfa09b4fb33eecb409d4a1d03d2a93829a9c097a17f4e907264e3b49a5"
+      url "https://github.com/graysurf/agent-workspace-launcher/releases/download/v1.1.6/agent-workspace-launcher-v1.1.6-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "fd75d1dc1fc5807a9e50d625db46d61467aa489945de1653ebcb067d66e5f621"
     end
   end
   def install

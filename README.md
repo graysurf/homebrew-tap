@@ -35,7 +35,8 @@ Source git repo: [graysurf/nils-cli](https://github.com/graysurf/nils-cli)
 - `codex-cli`: Provider-specific CLI for OpenAI/Codex workflows (auth, diagnostics, execution wrappers, Starship).
 - `gemini-cli`: Provider-specific CLI lane for Gemini workflows.
 - `semantic-commit`: Helper CLI for generating staged context and creating semantic commits.
-- `plan-tooling`: Plan Format v1 tooling CLI (to-json/validate/batches/scaffold).
+- `plan-tooling`: Plan Format v1 tooling CLI (`to-json`, `validate`, `batches`, `split-prs`, `scaffold`, `completion`).
+- `plan-issue`, `plan-issue-local`: Plan issue orchestration CLIs for build/start/status/ready/accept/close workflows plus completion export.
 
 #### Automation and utility CLIs
 

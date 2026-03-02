@@ -1,4 +1,4 @@
-# sympoies Homebrew tap
+# Sympoies Homebrew tap
 
 ## Formula overview
 

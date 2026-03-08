@@ -5,21 +5,21 @@ class NilsCli < Formula
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/graysurf/nils-cli/releases/download/v0.6.4/nils-cli-v0.6.4-aarch64-apple-darwin.tar.gz"
-      sha256 "17e2d18391242cc08fa244e2386a8cc380720e391d45a8d647d1436a841fb6b4"
+      url "https://github.com/graysurf/nils-cli/releases/download/v0.6.5/nils-cli-v0.6.5-aarch64-apple-darwin.tar.gz"
+      sha256 "77ea46040aaa5f3de6bea501745c08182b1040855350e8e72c17ec2b4b19eb58"
     else
-      url "https://github.com/graysurf/nils-cli/releases/download/v0.6.4/nils-cli-v0.6.4-x86_64-apple-darwin.tar.gz"
-      sha256 "57e386d1e936e9bc3a4e6ce6ebfe20619caf06d5c366aabf2e61e878c575cc84"
+      url "https://github.com/graysurf/nils-cli/releases/download/v0.6.5/nils-cli-v0.6.5-x86_64-apple-darwin.tar.gz"
+      sha256 "61aeadd9549cec0746a115d20619a43cee9445b884499fd74e745fc817de0c65"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://github.com/graysurf/nils-cli/releases/download/v0.6.4/nils-cli-v0.6.4-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "18c4f85b630bc5574a52bb655f3143943027e61db8dbf74727336c1881a5ac3a"
+      url "https://github.com/graysurf/nils-cli/releases/download/v0.6.5/nils-cli-v0.6.5-aarch64-unknown-linux-gnu.tar.gz"
+      sha256 "e2dbb6c8f9e7e8ece438a7ee84065ec7041078c2f717b0e5660fee6461a53bba"
     else
-      url "https://github.com/graysurf/nils-cli/releases/download/v0.6.4/nils-cli-v0.6.4-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "6c445e067126f2fce65a79fe292c4bc15b89bf20f2bb1bc3308a26c4110734bb"
+      url "https://github.com/graysurf/nils-cli/releases/download/v0.6.5/nils-cli-v0.6.5-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "183bb0f949cc1842bb4423652660cb68c46ab059c6e3145d462482354ae97f7e"
     end
   end
 
